@@ -59,14 +59,17 @@ public class LampPlugin implements MethodCallHandler {
     }
 
     private CameraManager getCameCameraManager(){
+        CameraManager cameraManager = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return (CameraManager) _registrar.context().getSystemService(Context.CAMERA_SERVICE);
+            cameraManager = (CameraManager) _registrar.context().getSystemService(Context.CAMERA_SERVICE);
         }
+        return cameraManager;
     }
 
     private void turn(boolean on) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (_cameCameraManager == null || !hasLamp()) return;
             String cameraId = null;
             try {
                 try {
