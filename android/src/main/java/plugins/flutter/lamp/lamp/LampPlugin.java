@@ -18,7 +18,6 @@ public class LampPlugin implements MethodCallHandler {
     private LampPlugin(Registrar registrar) {
         this._registrar = registrar;
         this._camera = this.getCamera();
-        this._cameCameraManager = this.getCameCameraManager();
     }
 
     public static void registerWith(Registrar registrar) {
@@ -58,27 +57,17 @@ public class LampPlugin implements MethodCallHandler {
         }
     }
 
-    private CameraManager getCameCameraManager(){
-        CameraManager cameraManager = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            cameraManager = (CameraManager) _registrar.context().getSystemService(Context.CAMERA_SERVICE);
-        }
-        return cameraManager;
-    }
-
     private void turn(boolean on) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (_cameCameraManager == null) _cameCameraManager =
+                    (CameraManager) _registrar.context().getSystemService(Context.CAMERA_SERVICE);
             if (_cameCameraManager == null || !hasLamp()) return;
             String cameraId = null;
             try {
-                try {
-                    cameraId = _cameCameraManager.getCameraIdList()[0];
-                } catch (CameraAccessException e) {
-                    e.printStackTrace();
-                }
-                _cameCameraManager.setTorchMode(cameraId, on);
-            } catch (CameraAccessException e) {
+                String[] camList = _cameCameraManager.getCameraIdList();
+                _cameCameraManager.setTorchMode(camList[0], on);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return;
@@ -99,7 +88,7 @@ public class LampPlugin implements MethodCallHandler {
     }
 
     private boolean hasLamp() {
-        return _registrar.context().getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+        return _registrar.context().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
     }
 
 }
