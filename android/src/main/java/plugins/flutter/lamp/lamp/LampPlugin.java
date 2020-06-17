@@ -11,7 +11,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /**
  * LampPlugin
- * Modified By Erkan Alkanat 17 June 2020. Changes support Android 6+.
+ * Modified By Erkan Alkanat 17 June 2020. Changes support Android 6+
  */
 public class LampPlugin implements MethodCallHandler {
 
