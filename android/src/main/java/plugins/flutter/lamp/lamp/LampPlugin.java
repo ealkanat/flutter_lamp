@@ -11,12 +11,14 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /**
  * LampPlugin
+ * Modified By Erkan Alkanat 17 June 2020. Changes support Android 6+.
  */
 public class LampPlugin implements MethodCallHandler {
 
     private LampPlugin(Registrar registrar) {
         this._registrar = registrar;
         this._camera = this.getCamera();
+        this._cameCameraManager = this.getCameCameraManager();
     }
 
     public static void registerWith(Registrar registrar) {
@@ -24,6 +26,7 @@ public class LampPlugin implements MethodCallHandler {
         channel.setMethodCallHandler(new LampPlugin(registrar));
     }
 
+    private CameraManager _cameCameraManager;
     private Camera _camera;
     private Registrar _registrar;
 
@@ -55,7 +58,29 @@ public class LampPlugin implements MethodCallHandler {
         }
     }
 
+    private CameraManager getCameCameraManager(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return (CameraManager) _registrar.context().getSystemService(Context.CAMERA_SERVICE);
+        }
+    }
+
     private void turn(boolean on) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String cameraId = null;
+            try {
+                try {
+                    cameraId = _cameCameraManager.getCameraIdList()[0];
+                } catch (CameraAccessException e) {
+                    e.printStackTrace();
+                }
+                _cameCameraManager.setTorchMode(cameraId, on);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
         Camera.Parameters params;
         if (_camera == null || !hasLamp()) {
             return;
