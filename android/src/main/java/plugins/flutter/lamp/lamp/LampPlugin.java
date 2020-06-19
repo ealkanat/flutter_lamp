@@ -1,7 +1,11 @@
 package plugins.flutter.lamp.lamp;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
+import android.os.Build;
 
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -11,7 +15,6 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /**
  * LampPlugin
- * Modified By Erkan Alkanat 17 June 2020. Changes support Android 6+
  */
 public class LampPlugin implements MethodCallHandler {
 
@@ -63,10 +66,16 @@ public class LampPlugin implements MethodCallHandler {
             if (_cameCameraManager == null) _cameCameraManager =
                     (CameraManager) _registrar.context().getSystemService(Context.CAMERA_SERVICE);
             if (_cameCameraManager == null || !hasLamp()) return;
+
             String cameraId = null;
             try {
                 String[] camList = _cameCameraManager.getCameraIdList();
                 _cameCameraManager.setTorchMode(camList[0], on);
+                if(!on){
+                    _cameCameraManager = null;
+                    if(cameraId != null)
+                        _camera.release();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -77,6 +86,7 @@ public class LampPlugin implements MethodCallHandler {
         if (_camera == null || !hasLamp()) {
             return;
         }
+
         params = _camera.getParameters();
         params.setFlashMode(on ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF);
         _camera.setParameters(params);
@@ -84,6 +94,7 @@ public class LampPlugin implements MethodCallHandler {
             _camera.startPreview();
         } else {
             _camera.stopPreview();
+            _camera.release();
         }
     }
 
