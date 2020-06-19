@@ -20,7 +20,9 @@ public class LampPlugin implements MethodCallHandler {
 
     private LampPlugin(Registrar registrar) {
         this._registrar = registrar;
-        this._camera = this.getCamera();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            this._camera = this.getCamera();
+        }
     }
 
     public static void registerWith(Registrar registrar) {
@@ -71,11 +73,6 @@ public class LampPlugin implements MethodCallHandler {
             try {
                 String[] camList = _cameCameraManager.getCameraIdList();
                 _cameCameraManager.setTorchMode(camList[0], on);
-                if(!on){
-                    _cameCameraManager = null;
-                    if(cameraId != null)
-                        _camera.release();
-                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
